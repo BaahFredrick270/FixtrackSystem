@@ -1,0 +1,133 @@
+﻿@model Fixtrack.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Details";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h1 class="h3 fw-bold mb-0">@Model.FullName</h1>
+
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
+    </div>
+</div>
+
+
+<!-- ================= CUSTOMER INFO ================= -->
+
+<div class="card mb-4">
+    <div class="card-body p-4">
+
+        <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Customer details</h2>
+
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Customer ID</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+
+            <dt class="col-sm-3">Phone</dt>
+            <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@(Model.Email ?? "—")</dd>
+
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9">@(Model.Address ?? "—")</dd>
+
+            <dt class="col-sm-3">Preferred Contact</dt>
+            <dd class="col-sm-9">@Model.PreferredContactMethod</dd>
+
+            <dt class="col-sm-3">Registered On</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd MMM yyyy")</dd>
+        </dl>
+
+    </div>
+</div>
+
+
+<!-- ================= DEVICES ================= -->
+
+<div class="card mb-4">
+    <div class="card-body p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-0">Devices</h2>
+        </div>
+
+        @if (!Model.Devices.Any())
+        {
+            <p class="text-muted mb-0">No devices on record for this customer.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="ft-thead">
+                        <tr>
+                            <th>Type</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Serial Number</th>
+                            <th>Added On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var device in Model.Devices)
+                        {
+                            <tr>
+                                <td>@device.DeviceType</td>
+                                <td>@device.Brand</td>
+                                <td>@device.Model</td>
+                                <td>@(device.SerialNumber ?? "—")</td>
+                                <td>@device.CreatedAt.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</div>
+
+
+<!-- ================= REPAIR JOBS ================= -->
+
+<div class="card">
+    <div class="card-body p-4">
+
+        <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Repair history</h2>
+
+        @if (!Model.RepairJobs.Any())
+        {
+            <p class="text-muted mb-0">No repair jobs recorded for this customer yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="ft-thead">
+                        <tr>
+                            <th>Job #</th>
+                            <th>Device</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var job in Model.RepairJobs)
+                        {
+                            <tr>
+                                <td>@job.JobNumber</td>
+                                <td>@(job.Device?.DisplayName ?? "—")</td>
+                                <td>@job.Status</td>
+                                <td>@job.CreatedAt.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</div>

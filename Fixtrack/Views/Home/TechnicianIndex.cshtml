@@ -1,0 +1,77 @@
+﻿@model Fixtrack.ViewModels.TechnicianDashboardViewModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-2">
+
+    <div>
+        <h1 class="h3 fw-bold mb-1">
+            Good day, @Model.StaffName
+        </h1>
+
+        <p class="text-muted mb-0">
+            Signed in as
+            <span class="badge text-bg-secondary">@Model.Role</span>
+            &middot; @Model.Specialization
+            &middot;
+            <span class="badge @(Model.Status == "Available" ? "text-bg-success" : "text-bg-warning")">
+                @Model.Status
+            </span>
+        </p>
+    </div>
+
+    <a asp-controller="RepairJobs" asp-action="Index" class="btn btn-primary">
+        View My Repairs
+    </a>
+
+</div>
+
+
+<!-- KPI grid: technician's own work only -->
+<div class="kpi-grid mb-4">
+
+    <a asp-controller="RepairJobs" asp-action="Index" class="kpi-card kpi-blue">
+        <span class="kpi-icon"><i class="bi bi-clipboard-data"></i></span>
+        <div>
+            <div class="kpi-number">@Model.AssignedCount</div>
+            <div class="kpi-label">Assigned to me</div>
+        </div>
+    </a>
+
+    <a asp-controller="RepairJobs" asp-action="Index" class="kpi-card kpi-amber">
+        <span class="kpi-icon"><i class="bi bi-search"></i></span>
+        <div>
+            <div class="kpi-number">@Model.NeedsDiagnosisCount</div>
+            <div class="kpi-label">Needs diagnosis</div>
+        </div>
+    </a>
+
+    <a asp-controller="RepairJobs" asp-action="Index" class="kpi-card kpi-teal">
+        <span class="kpi-icon"><i class="bi bi-wrench-adjustable"></i></span>
+        <div>
+            <div class="kpi-number">@Model.RepairingCount</div>
+            <div class="kpi-label">Currently repairing</div>
+        </div>
+    </a>
+
+    <a asp-controller="RepairJobs" asp-action="Index" class="kpi-card kpi-green">
+        <span class="kpi-icon"><i class="bi bi-check-circle"></i></span>
+        <div>
+            <div class="kpi-number">@Model.CompletedCount</div>
+            <div class="kpi-label">Completed by me</div>
+        </div>
+    </a>
+
+</div>
+
+
+@if (Model.AssignedCount == 0)
+{
+    <div class="alert alert-light border mb-0 small">
+        <strong>No jobs assigned to you yet.</strong>
+        Once a receptionist assigns you a repair, it will show up here.
+    </div>
+}

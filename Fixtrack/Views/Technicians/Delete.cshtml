@@ -1,0 +1,18 @@
+﻿@model Fixtrack.Models.Technician
+
+@{
+    ViewData["Title"] = "Remove Technician";
+}
+
+<h1 class="h3 fw-bold mb-4">Remove technician</h1>
+
+<div class="alert alert-danger">
+    <strong>Remove @Model.User?.FullName?</strong>
+    Their login will be deactivated. Past repair records are kept.
+    They currently have @Model.RepairJobs.Count(j => !j.IsClosed) open job(s).
+</div>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+    <button type="submit" class="btn btn-danger">Remove</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>

@@ -1,0 +1,563 @@
+@model Fixtrack.ViewModels.HomeDashboardViewModel
+
+@{
+    ViewData["Title"] = "Home";
+    var signedIn = User.Identity?.IsAuthenticated ?? false;
+    var hasJobData = Model.UnassignedJobs > 0 || Model.AwaitingApproval > 0 || Model.ReadyForPickup > 0;
+}
+
+@if (!signedIn)
+{
+    
+
+    <section id="home" class="hero-bleed hero-photo-bg">
+        <div class="hero-scrim">
+            <div class="container py-5 my-md-4">
+                <div class="row align-items-center g-4">
+
+                    <div class="col-lg-7 hero-copy">
+                        <span class="badge rounded-pill hero-badge mb-3">
+                            Repair Management
+                        </span>
+
+                        <h1 class="display-5 fw-bold mb-3">
+                            Every repair, tracked from counter to collection.
+                        </h1>
+
+                        <p class="lead mb-4">
+                            FixTrack keeps the whole workshop on one page —
+                            who brought what in, who is fixing it, what it will
+                            cost, and who still needs calling.
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-primary btn-lg px-4"
+                               asp-controller="Account"
+                               asp-action="Login">
+                                Login
+                            </a>
+                        </div>
+
+                        <p class="small mt-3 mb-0 hero-note">
+                            Staff accounts only. Ask the front desk for access.
+                        </p>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="ticket shadow-lg rounded-4 p-3">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fw-bold">FT-2026-0148</span>
+                                <span class="badge text-bg-warning">Under Repair</span>
+                            </div>
+
+                            <div class="small text-muted mb-1">
+                                Device
+                            </div>
+
+                            <div class="fw-semibold mb-3">
+                                HP Pavilion 15 &middot; Silver
+                            </div>
+
+                            <div class="row small">
+
+                                <div class="col-6">
+                                    <div class="text-muted">
+                                        Customer
+                                    </div>
+
+                                    <div class="fw-semibold">
+                                        Ama Mensah
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="text-muted">
+                                        Technician
+                                    </div>
+
+                                    <div class="fw-semibold">
+                                        Kofi Mensah
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <hr />
+
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-muted">
+                                    Estimated
+                                </span>
+
+                                <span class="fw-bold">
+                                    GH&cent; 320.00
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============ SERVICES ============ -->
+
+    <section id="services" class="pt-5 mb-5">
+
+        <h2 class="h4 fw-bold mb-1">
+            What FixTrack handles
+        </h2>
+
+        <p class="text-muted mb-4">
+            Everything a repair shop has to keep track of, in one place.
+        </p>
+
+        <div class="row g-3">
+
+            @{
+                var services = new (string Icon, string Title, string Text)[]
+                {
+                    (
+                        "bi-search",
+                        "Repair Tracking",
+                        "Every device has a status and a history. Nothing sits on the bench forgotten."
+                    ),
+                    (
+                        "bi-robot",
+                        "Automatic Technician Assignment",
+                        "New jobs go to the nearest available technician with the right specialisation."
+                    ),
+                    (
+                        "bi-people",
+                        "Customer Management",
+                        "Customers, their devices, and every repair they have ever brought in."
+                    ),
+                    (
+                        "bi-tools",
+                        "Parts Management",
+                        "Stock levels, what each repair consumed, and what it cost at the time."
+                    ),
+                    (
+                        "bi-credit-card",
+                        "Payment Tracking",
+                        "Estimates, final costs, part-payments and outstanding balances."
+                    ),
+                    (
+                        "bi-file-earmark-text",
+                        "Complaint Management",
+                        "If a device comes back, log the complaint and send it for rework."
+                    )
+                };
+            }
+
+            @foreach (var service in services)
+            {
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="card h-100 hover-lift">
+
+                        <div class="card-body p-4">
+
+                            <div class="feature-icon mb-2">
+                                <i class="bi @service.Icon"></i>
+                            </div>
+
+                            <h3 class="h6 fw-bold">
+                                @service.Title
+                            </h3>
+
+                            <p class="small text-muted mb-0">
+                                @service.Text
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </section>
+
+
+    <!-- ============ HOW IT WORKS ============ -->
+
+    <section id="how-it-works" class="pt-4 mb-5">
+
+        <h2 class="h4 fw-bold mb-1">
+            How a repair moves
+        </h2>
+
+        <p class="text-muted mb-4">
+            Eight steps, and the system knows which one every device is on.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            @{
+                var steps = new[]
+                {
+                    "Received",
+                    "Assigned",
+                    "Diagnosed",
+                    "Approved",
+                    "Repaired",
+                    "Ready",
+                    "Paid",
+                    "Collected"
+                };
+            }
+
+            @for (var i = 0; i < steps.Length; i++)
+            {
+                <div class="flow-step flex-fill text-center rounded-3 border px-3 py-2">
+
+                    <div class="flow-num">
+                        @(i + 1)
+                    </div>
+
+                    <div class="small fw-semibold">
+                        @steps[i]
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </section>
+
+
+    <!-- ============ ABOUT / ROLES ============ -->
+
+    <section id="about" class="pt-4 mb-5">
+
+        <h2 class="h4 fw-bold mb-1">
+            Who uses it
+        </h2>
+
+        <p class="text-muted mb-4">
+            Two roles, each seeing only what they need.
+        </p>
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <div class="card h-100 hover-lift">
+
+                    <div class="card-body p-4">
+
+                        <div class="feature-icon mb-2">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+
+                        <h3 class="h6 fw-bold">
+                            Receptionist
+                        </h3>
+
+                        <p class="small text-muted mb-0">
+                            Registers customers and devices, opens repair jobs,
+                            records what the customer approved, takes payment,
+                            and calls people when work is done.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="card h-100 hover-lift">
+
+                    <div class="card-body p-4">
+
+                        <div class="feature-icon mb-2">
+                            <i class="bi bi-wrench-adjustable"></i>
+                        </div>
+
+                        <h3 class="h6 fw-bold">
+                            Technician
+                        </h3>
+
+                        <p class="small text-muted mb-0">
+                            Sees only the jobs assigned to them, records the
+                            diagnosis and parts used, and moves each repair
+                            along as the work progresses.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+}
+else
+{
+    <!-- ============ SIGNED IN: DASHBOARD LAYOUT ============ -->
+    @*
+        Global navigation and account identity already live in
+        _Layout.cshtml. This view is just dashboard content: a header,
+        one unified KPI grid, and supporting content below.
+    *@
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-2">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Good day, @Model.StaffName
+            </h1>
+
+            <p class="text-muted mb-0">
+                Signed in as
+                <span class="badge text-bg-secondary">
+                    @Model.Role
+                </span>
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Customers" asp-action="Create" class="btn btn-primary">
+                New Customer
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- Unified KPI grid -->
+    <div class="kpi-grid mb-4">
+
+        <a asp-controller="Customers" asp-action="Index" class="kpi-card kpi-purple">
+            <span class="kpi-icon"><i class="bi bi-people"></i></span>
+            <div>
+                <div class="kpi-number">@Model.CustomerCount</div>
+                <div class="kpi-label">Customers registered</div>
+            </div>
+        </a>
+
+        <a asp-controller="Devices" asp-action="Index" class="kpi-card kpi-teal">
+            <span class="kpi-icon"><i class="bi bi-laptop"></i></span>
+            <div>
+                <div class="kpi-number">@Model.DeviceCount</div>
+                <div class="kpi-label">Devices on record</div>
+            </div>
+        </a>
+
+        <div class="kpi-card kpi-amber">
+            <span class="kpi-icon"><i class="bi bi-hourglass-split"></i></span>
+            <div>
+                <div class="kpi-number">@Model.UnassignedJobs</div>
+                <div class="kpi-label">Waiting for a technician</div>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-blue">
+            <span class="kpi-icon"><i class="bi bi-clipboard-check"></i></span>
+            <div>
+                <div class="kpi-number">@Model.AwaitingApproval</div>
+                <div class="kpi-label">Awaiting approval</div>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-green">
+            <span class="kpi-icon"><i class="bi bi-check-circle"></i></span>
+            <div>
+                <div class="kpi-number">@Model.ReadyForPickup</div>
+                <div class="kpi-label">Ready for pickup</div>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-slate">
+            <span class="kpi-icon"><i class="bi bi-clipboard-data"></i></span>
+            <div>
+                <div class="kpi-number">@Model.OpenJobs</div>
+                <div class="kpi-label">Open jobs</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Repair status chart -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-4">Repair job breakdown</h2>
+
+            @if (!hasJobData)
+            {
+                <p class="text-muted mb-0">No repair jobs yet — this chart will fill in once jobs are created.</p>
+            }
+            else
+            {
+                <div class="row align-items-center g-4">
+                    <div class="col-md-6 d-flex justify-content-center">
+                        <div style="position: relative; width: 320px; height: 320px; max-width: 100%;">
+                            <canvas id="repairStatusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #f59e0b; display: inline-block;"></span>
+                                <span>Waiting for technician</span>
+                            </div>
+                            <span class="fw-bold">@Model.UnassignedJobs</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #1d4ed8; display: inline-block;"></span>
+                                <span>Awaiting approval</span>
+                            </div>
+                            <span class="fw-bold">@Model.AwaitingApproval</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between py-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #16a34a; display: inline-block;"></span>
+                                <span>Ready for pickup</span>
+                            </div>
+                            <span class="fw-bold">@Model.ReadyForPickup</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <!-- Repair jobs area -->
+    @if (Model.OpenJobs == 0)
+    {
+        <div class="alert alert-light border mb-0 small">
+            <strong>No repair jobs yet.</strong>
+            Repair job screens are still being built —
+            for now you can register customers and their devices.
+        </div>
+    }
+}
+
+
+<!-- ================= LANDING PAGE SCRIPTS ================= -->
+@section Scripts
+{
+    <script>
+        // ScrollSpy highlights the navigation link
+        // for the section currently visible on screen.
+
+        (function() {
+
+            var nav = document.getElementById("landingNav");
+
+            if (!nav || !document.getElementById("services")) {
+                return;
+            }
+
+            new bootstrap.ScrollSpy(document.body, {
+                target: "#landingNav",
+                rootMargin: "0% 0% -60% 0%"
+            });
+
+        })();
+    </script>
+
+    @if (signedIn && hasJobData)
+    {
+        <script>
+            (function() {
+                var canvas = document.getElementById("repairStatusChart");
+                if (!canvas) return;
+
+                var computedColor = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--ft-text').trim();
+                var computedSurface = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--ft-surface').trim();
+
+                var textColor = computedColor || "#111827";
+                var surfaceColor = computedSurface || "#ffffff";
+
+                var data = [
+                                @Model.UnassignedJobs,
+                                @Model.AwaitingApproval,
+                    @Model.ReadyForPickup
+                ];
+                var total = data.reduce(function(a, b) { return a + b; }, 0);
+
+                var centerTextPlugin = {
+                    id: "centerText",
+                    beforeDraw: function(chart) {
+                        var ctx = chart.ctx;
+                        var area = chart.chartArea;
+                        var x = (area.left + area.right) / 2;
+                        var y = (area.top + area.bottom) / 2;
+
+                        ctx.save();
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+
+                        ctx.font = "700 48px sans-serif";
+                        ctx.fillStyle = textColor;
+                        ctx.fillText(total, x, y - 16);
+
+                        ctx.font = "15px sans-serif";
+                        ctx.fillStyle = textColor;
+                        ctx.globalAlpha = 0.6;
+                        ctx.fillText(total === 1 ? "total job" : "total jobs", x, y + 20);
+
+                        ctx.restore();
+                    }
+                };
+
+                new Chart(canvas, {
+                    type: "doughnut",
+                    data: {
+                        labels: [
+                            "Waiting for technician",
+                            "Awaiting approval",
+                            "Ready for pickup"
+                        ],
+                        datasets: [{
+                            data: data,
+                            backgroundColor: ["#f59e0b", "#1d4ed8", "#16a34a"],
+                            borderColor: surfaceColor,
+                            borderWidth: 4,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: "72%",
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(ctx) {
+                                        var value = ctx.parsed;
+                                        return " " + ctx.label + ": " + value + (value === 1 ? " job" : " jobs");
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [centerTextPlugin]
+                });
+            })();
+        </script>
+    }
+}

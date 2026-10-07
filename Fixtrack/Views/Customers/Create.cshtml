@@ -1,0 +1,164 @@
+﻿@model Fixtrack.ViewModels.CustomerRegistrationViewModel
+
+@{
+    ViewData["Title"] = "New Customer";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold mb-0">Register a new customer</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
+</div>
+
+<div class="card form-card">
+    <div class="card-body p-4">
+
+        <form asp-action="Create" method="post" id="customerForm">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Customer details</h2>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="FirstName" class="form-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="LastName" class="form-label"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h6 fw-bold text-muted text-uppercase mb-0">Devices brought in</h2>
+                <button type="button" id="addDeviceBtn" class="btn btn-sm btn-outline-primary">
+                    + Add another device
+                </button>
+            </div>
+
+            <div id="deviceRows">
+                @for (var i = 0; i < Model.Devices.Count; i++)
+                {
+                    <div class="row g-3 mb-3 device-row align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Device Type</label>
+                            <select name="Devices[@i].DeviceType" class="form-select"
+                                    asp-items="Html.GetEnumSelectList<Fixtrack.Models.DeviceType>()">
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Brand</label>
+                            <input name="Devices[@i].Brand" class="form-control" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Model</label>
+                            <input name="Devices[@i].Model" class="form-control" />
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger w-100 remove-device-btn">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Register Customer</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<!-- Hidden template used to clone new device rows -->
+<template id="deviceRowTemplate">
+    <div class="row g-3 mb-3 device-row align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Device Type</label>
+            <select name="Devices[__index__].DeviceType" class="form-select">
+                @foreach (var item in Html.GetEnumSelectList<Fixtrack.Models.DeviceType>())
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Brand</label>
+            <input name="Devices[__index__].Brand" class="form-control" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Model</label>
+            <input name="Devices[__index__].Model" class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-danger w-100 remove-device-btn">
+                Remove
+            </button>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        (function () {
+            var container = document.getElementById("deviceRows");
+            var addBtn = document.getElementById("addDeviceBtn");
+            var template = document.getElementById("deviceRowTemplate");
+
+            function reindexRows() {
+                var rows = container.querySelectorAll(".device-row");
+                rows.forEach(function (row, index) {
+                    row.querySelectorAll("[name]").forEach(function (field) {
+                        field.name = field.name.replace(/Devices\[\d+\]/, "Devices[" + index + "]");
+                    });
+                });
+            }
+
+            addBtn.addEventListener("click", function () {
+                var clone = template.content.cloneNode(true);
+                var nextIndex = container.querySelectorAll(".device-row").length;
+                clone.querySelectorAll("[name]").forEach(function (field) {
+                    field.name = field.name.replace("__index__", nextIndex);
+                });
+                container.appendChild(clone);
+            });
+
+            container.addEventListener("click", function (e) {
+                if (e.target.classList.contains("remove-device-btn")) {
+                    var rows = container.querySelectorAll(".device-row");
+                    if (rows.length > 1) {
+                        e.target.closest(".device-row").remove();
+                        reindexRows();
+                    }
+                }
+            });
+        })();
+    </script>
+}

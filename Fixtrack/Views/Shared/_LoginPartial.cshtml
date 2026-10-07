@@ -1,0 +1,149 @@
+@using Microsoft.AspNetCore.Identity
+@using Fixtrack.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav align-items-lg-center">
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var user = await UserManager.GetUserAsync(User);
+
+        var roles = user is null
+            ? new List<string>()
+            : (await UserManager.GetRolesAsync(user)).ToList();
+
+        var displayName = user?.FullName
+            ?? User.Identity?.Name
+            ?? "Staff";
+
+        var initials = string.Concat(
+            displayName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2)
+                .Select(part => char.ToUpperInvariant(part[0]))
+        );
+
+        <li class="nav-item dropdown">
+
+            <a class="nav-link account-toggle d-flex align-items-center gap-2"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+
+                <span class="avatar-mark">
+                    @initials
+                </span>
+
+                <span class="d-none d-lg-inline account-name">
+                    @displayName
+                </span>
+
+                <svg class="account-caret"
+                     xmlns="http://www.w3.org/2000/svg"
+                     width="14"
+                     height="14"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+
+                    <path d="m6 9 6 6 6-6" />
+
+                </svg>
+
+            </a>
+
+
+            <!-- Account dropdown -->
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm account-menu">
+
+                <!-- User information -->
+                <li class="account-head px-3 pt-3 pb-2">
+
+                    <div class="d-flex align-items-center gap-2 mb-2">
+
+                        <span class="avatar-mark">
+                            @initials
+                        </span>
+
+                        <div class="overflow-hidden">
+
+                            <div class="fw-semibold text-truncate">
+                                @displayName
+                            </div>
+
+                            <div class="small text-muted text-truncate">
+                                @user?.Email
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    @if (roles.Any())
+                    {
+                        <span class="badge text-bg-secondary">
+                            @roles.First()
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge text-bg-light border">
+                            No role assigned
+                        </span>
+                    }
+
+                </li>
+
+
+                <li>
+                    <hr class="dropdown-divider" />
+                </li>
+
+
+                <!-- Logout -->
+                <li>
+
+                    <form asp-area="Identity"
+                          asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+
+                        <button type="submit"
+                                class="dropdown-item">
+
+                            Log out
+
+                        </button>
+
+                    </form>
+
+                </li>
+
+            </ul>
+
+        </li>
+    }
+    else
+    {
+        <!-- Login -->
+        <li class="nav-item">
+
+            <a class="nav-link nav-signin"
+               asp-controller="Account"
+               asp-action="Login">
+
+                Log in
+
+            </a>
+
+        </li>
+    }
+
+</ul>

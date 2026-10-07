@@ -1,0 +1,58 @@
+@model IEnumerable<Fixtrack.Models.Technician>
+
+@{
+    ViewData["Title"] = "Technicians";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h1 class="h3 fw-bold mb-0">Technicians</h1>
+    <a asp-action="Create" class="btn btn-primary">New Technician</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card empty-state text-center py-5">
+        <div class="card-body">
+            <p class="text-muted mb-3">No technicians registered yet.</p>
+            <a asp-action="Create" class="btn btn-primary">Register your first technician</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="ft-thead">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Specialization</th>
+                        <th>Base</th>
+                        <th>Status</th>
+                        <th>Open jobs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        var badge = t.Status switch
+                        {
+                            Fixtrack.Models.TechnicianStatus.Available => "text-bg-success",
+                            Fixtrack.Models.TechnicianStatus.Busy => "text-bg-warning",
+                            _ => "text-bg-secondary"
+                        };
+                        <tr>
+                            <td>@(t.User?.FullName ?? "—")</td>
+                            <td>@(t.User?.Email ?? "—")</td>
+                            <td>@t.Specialization</td>
+                            <td>@(t.BaseLocation ?? "—")</td>
+                            <td><span class="badge @badge">@t.Status</span></td>
+                            <td>@t.RepairJobs.Count(j => !j.IsClosed)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

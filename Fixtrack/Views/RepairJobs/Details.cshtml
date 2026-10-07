@@ -1,0 +1,293 @@
+﻿@using Fixtrack.Models
+@using Fixtrack.Controllers
+@model Fixtrack.Models.RepairJob
+
+@{
+    ViewData["Title"] = $"Job {Model.JobNumber}";
+    var allowedMoves = RepairJobsController.AllowedMoves.TryGetValue(Model.Status, out var moves)
+        ? moves
+        : Array.Empty<RepairStatus>();
+
+    // Before the customer has a quote to react to, the estimated cost is
+    // just the technician's working number - the receptionist has nothing
+    // to relay yet. Once the job reaches AwaitingApproval (or moves past
+    // it), the receptionist needs the figure to pass on to the customer
+    // and record their decision.
+    var showCostToReceptionist = Model.Status != RepairStatus.Received
+        && Model.Status != RepairStatus.Assigned
+        && Model.Status != RepairStatus.Diagnosing;
+
+    var canSeeCost = User.IsInRole("Technician") || showCostToReceptionist;
+
+    string BadgeClass(RepairStatus status) => status switch
+    {
+        RepairStatus.Received => "text-bg-secondary",
+        RepairStatus.Assigned => "text-bg-info",
+        RepairStatus.Diagnosing => "text-bg-info",
+        RepairStatus.AwaitingApproval => "text-bg-primary",
+        RepairStatus.Repairing => "text-bg-warning",
+        RepairStatus.AwaitingParts => "text-bg-warning",
+        RepairStatus.ReadyForPickup => "text-bg-success",
+        RepairStatus.Completed => "text-bg-success",
+        RepairStatus.Cancelled => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+}
+
+@if (TempData["Status"] != null)
+{
+    <div class="alert alert-success">@TempData["Status"]</div>
+}
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning">@TempData["Warning"]</div>
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h1 class="h3 fw-bold mb-1">@Model.JobNumber</h1>
+        <span class="badge @BadgeClass(Model.Status)">@Model.Status</span>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
+</div>
+
+
+<!-- ================= JOB INFO ================= -->
+
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Job details</h2>
+
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Customer</dt>
+            <dd class="col-sm-9">@(Model.Customer?.FullName ?? "—")</dd>
+
+            <dt class="col-sm-3">Device</dt>
+            <dd class="col-sm-9">@(Model.Device?.DisplayName ?? "—")</dd>
+
+            <dt class="col-sm-3">Technician</dt>
+            <dd class="col-sm-9">@(Model.Technician?.User?.FullName ?? "Unassigned")</dd>
+
+            <dt class="col-sm-3">Reported Problem</dt>
+            <dd class="col-sm-9">@Model.ReportedProblem</dd>
+
+            @if (!string.IsNullOrWhiteSpace(Model.DeviceCondition))
+            {
+                <dt class="col-sm-3">Device Condition</dt>
+                <dd class="col-sm-9">@Model.DeviceCondition</dd>
+            }
+
+            <dt class="col-sm-3">Specialization</dt>
+            <dd class="col-sm-9">@Model.RequiredSpecialization</dd>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Diagnosis))
+            {
+                <dt class="col-sm-3">Diagnosis</dt>
+                <dd class="col-sm-9">@Model.Diagnosis</dd>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.WorkPerformed))
+            {
+                <dt class="col-sm-3">Work Performed</dt>
+                <dd class="col-sm-9">@Model.WorkPerformed</dd>
+            }
+
+            @if (canSeeCost)
+            {
+                @if (Model.EstimatedCost.HasValue)
+                {
+                    <dt class="col-sm-3">Estimated Cost</dt>
+                    <dd class="col-sm-9">GH&cent; @Model.EstimatedCost.Value.ToString("N2")</dd>
+                }
+
+                @if (Model.FinalCost.HasValue)
+                {
+                    <dt class="col-sm-3">Final Cost</dt>
+                    <dd class="col-sm-9">GH&cent; @Model.FinalCost.Value.ToString("N2")</dd>
+                }
+            }
+
+            <dt class="col-sm-3">Received On</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd MMM yyyy, h:mm tt")</dd>
+        </dl>
+    </div>
+</div>
+
+
+<!-- ================= ASSIGN TECHNICIAN (RECEPTIONIST ONLY) ================= -->
+@if (User.IsInRole("Receptionist") && !Model.IsClosed)
+{
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Assign technician</h2>
+
+            <form asp-action="Assign" asp-route-id="@Model.Id" method="post" class="row g-2 align-items-end">
+                <div class="col-md-8">
+                    <select name="technicianId" class="form-select" asp-items="ViewBag.Technicians">
+                        <option value="">-- Auto-assign to the best available technician --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+<!-- ================= DIAGNOSIS (TECHNICIAN ONLY) ================= -->
+@if (User.IsInRole("Technician") && Model.Status is RepairStatus.Assigned or RepairStatus.Diagnosing)
+{
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Record diagnosis</h2>
+
+            <form asp-action="Diagnose" asp-route-id="@Model.Id" method="post">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">What did you find?</label>
+                        <textarea name="diagnosis" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Estimated Cost</label>
+                        <div class="input-group">
+                            <span class="input-group-text">GH&cent;</span>
+                            <input type="number" step="0.01" name="estimatedCost" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">Save Diagnosis</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+<!-- ================= CUSTOMER APPROVAL (RECEPTIONIST ONLY) ================= -->
+@if (User.IsInRole("Receptionist") && Model.Status == RepairStatus.AwaitingApproval)
+{
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Customer decision</h2>
+
+            <form asp-action="RecordApproval" asp-route-id="@Model.Id" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Notes (optional)</label>
+                    <input type="text" name="approvalNotes" class="form-control" />
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="approved" value="true" class="btn btn-success">
+                        Customer Approved
+                    </button>
+                    <button type="submit" name="approved" value="false" class="btn btn-outline-danger">
+                        Customer Declined
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+<!-- ================= WORKFLOW MOVES ================= -->
+@*
+    Hidden entirely while AwaitingApproval: the Customer Decision form above
+    is the only correct path at that stage. Showing a generic "Move to
+    Repairing" button here too would let someone skip recording the
+    customer's actual answer.
+    Each move is further gated by role: a technician moves the physical
+    work forward, the receptionist closes the job out on collection.
+*@
+
+@if (Model.Status != RepairStatus.AwaitingApproval
+     && allowedMoves.Any(m => m != RepairStatus.Cancelled))
+{
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Move status</h2>
+
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var move in allowedMoves.Where(m => m != RepairStatus.Cancelled))
+                {
+                    var moveRole = move == RepairStatus.Completed ? "Receptionist" : "Technician";
+
+                    @if (User.IsInRole(moveRole))
+                    {
+                        <form asp-action="SetStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            <input type="hidden" name="status" value="@move" />
+                            @if (move == RepairStatus.ReadyForPickup || move == RepairStatus.Completed)
+                            {
+                                <input type="text" name="workPerformed" class="form-control form-control-sm d-inline-block mb-1"
+                                       style="width: 220px;" placeholder="Work performed (optional)" />
+                            }
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                Move to @move
+                            </button>
+                        </form>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+
+<!-- ================= CANCEL ================= -->
+@if (allowedMoves.Contains(RepairStatus.Cancelled))
+{
+    <div class="card mb-4 border-danger">
+        <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-danger text-uppercase mb-3">Cancel job</h2>
+
+            <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="row g-2">
+                <div class="col-md-8">
+                    <input type="text" name="reason" class="form-control" placeholder="Reason for cancelling" required />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-danger w-100">Cancel Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+<!-- ================= NOTES ================= -->
+
+<div class="card">
+    <div class="card-body p-4">
+        <h2 class="h6 fw-bold text-muted text-uppercase mb-3">Notes</h2>
+
+        @if (!Model.Notes.Any())
+        {
+            <p class="text-muted mb-3">No notes yet.</p>
+        }
+        else
+        {
+            <ul class="list-unstyled mb-3">
+                @foreach (var note in Model.Notes.OrderByDescending(n => n.CreatedAt))
+                {
+                    <li class="mb-2 pb-2 border-bottom">
+                        <div>@note.Note</div>
+                        <div class="small text-muted">
+                            @(note.Technician?.User?.FullName ?? "Receptionist") &middot;
+                            @note.CreatedAt.ToString("dd MMM yyyy, h:mm tt")
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+
+        <form asp-action="AddNote" asp-route-id="@Model.Id" method="post" class="row g-2">
+            <div class="col-md-9">
+                <input type="text" name="note" class="form-control" placeholder="Add a note" />
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-secondary w-100">Add Note</button>
+            </div>
+        </form>
+    </div>
+</div>

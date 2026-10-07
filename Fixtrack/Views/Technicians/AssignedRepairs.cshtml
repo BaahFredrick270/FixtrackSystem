@@ -1,0 +1,217 @@
+```cshtml
+@{
+    ViewData["Title"] = "My Repair Jobs";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            My Repair Jobs
+        </h2>
+
+        <p class="text-muted">
+            View and manage repair jobs assigned to you.
+        </p>
+
+    </div>
+
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Status
+                    </label>
+
+                    <select class="form-select">
+
+                        <option>
+                            All Jobs
+                        </option>
+
+                        <option>
+                            Assigned
+                        </option>
+
+                        <option>
+                            In Progress
+                        </option>
+
+                        <option>
+                            Completed
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Search customer or device" />
+
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end">
+
+                    <button class="btn btn-primary w-100">
+                        Search
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Jobs -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Customer</th>
+                            <th>Device</th>
+                            <th>Problem</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>
+                                #JOB001
+                            </td>
+
+                            <td>
+                                Kwame Mensah
+                            </td>
+
+                            <td>
+                                iPhone 13
+                            </td>
+
+                            <td>
+                                Broken screen
+                            </td>
+
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    In Progress
+                                </span>
+                            </td>
+
+                            <td>
+                                <a asp-action="RepairDetails"
+                                   class="btn btn-sm btn-primary">
+                                    View
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                #JOB002
+                            </td>
+
+                            <td>
+                                Ama Boateng
+                            </td>
+
+                            <td>
+                                HP Laptop
+                            </td>
+
+                            <td>
+                                Laptop not powering on
+                            </td>
+
+                            <td>
+                                <span class="badge bg-info">
+                                    Assigned
+                                </span>
+                            </td>
+
+                            <td>
+                                <a asp-action="RepairDetails"
+                                   class="btn btn-sm btn-primary">
+                                    View
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                #JOB003
+                            </td>
+
+                            <td>
+                                Kofi Asante
+                            </td>
+
+                            <td>
+                                Samsung S23
+                            </td>
+
+                            <td>
+                                Charging problem
+                            </td>
+
+                            <td>
+                                <span class="badge bg-success">
+                                    Completed
+                                </span>
+                            </td>
+
+                            <td>
+                                <a asp-action="RepairDetails"
+                                   class="btn btn-sm btn-primary">
+                                    View
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```

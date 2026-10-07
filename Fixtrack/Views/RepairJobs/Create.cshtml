@@ -1,0 +1,92 @@
+﻿@model Fixtrack.Models.RepairJob
+
+@{
+    ViewData["Title"] = "New Repair Job";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold mb-0">Open a new repair job</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
+</div>
+
+<div class="card form-card mb-5">
+    <div class="card-body p-4">
+
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label asp-for="DeviceId" class="form-label">Device</label>
+                    <select asp-for="DeviceId" class="form-select" asp-items="ViewBag.Devices">
+                        <option value="">-- Select the device brought in --</option>
+                    </select>
+                    <span asp-validation-for="DeviceId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="RequiredSpecialization" class="form-label"></label>
+                    <select asp-for="RequiredSpecialization" class="form-select"
+                            asp-items="Html.GetEnumSelectList<Fixtrack.Models.Specialization>()">
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="ReportedProblem" class="form-label"></label>
+                    <textarea asp-for="ReportedProblem" class="form-control" rows="3"
+                              placeholder="What did the customer say is wrong?"></textarea>
+                    <span asp-validation-for="ReportedProblem" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="DeviceCondition" class="form-label"></label>
+                    <textarea asp-for="DeviceCondition" class="form-control" rows="2"
+                              placeholder="Cosmetic condition at hand-over, e.g. scratched screen"></textarea>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="AdditionalNotes" class="form-label"></label>
+                    <textarea asp-for="AdditionalNotes" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+
+            <p class="text-muted small">
+                The technician will set the estimated cost after diagnosing the device.
+            </p>
+
+            <div class="d-flex gap-2 mt-4 mb-3">
+                <button type="submit" class="btn btn-primary">Open Repair Job</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Pre-select the specialization that matches the chosen device.
+        (function() {
+            var deviceSelect = document.querySelector('select[name="DeviceId"]');
+            var specSelect = document.querySelector('select[name="RequiredSpecialization"]');
+            if (!deviceSelect || !specSelect) return;
+
+            deviceSelect.addEventListener("change", function() {
+                if (!this.value) return;
+
+                fetch("/RepairJobs/SpecializationForDevice?deviceId=" + this.value)
+                    .then(function(res) { return res.ok ? res.json() : null; })
+                    .then(function(data) {
+                        if (data && typeof data.specialization !== "undefined") {
+                            specSelect.value = data.specialization;
+                        }
+                    });
+            });
+        })();
+    </script>
+}

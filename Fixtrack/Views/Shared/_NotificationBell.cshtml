@@ -1,0 +1,78 @@
+﻿@using Fixtrack.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject Fixtrack.Data.ApplicationDbContext DbContext
+
+@{
+    var notifications = new List<Notification>();
+    var unreadCount = 0;
+
+    if (User.Identity?.IsAuthenticated ?? false)
+    {
+        var userId = UserManager.GetUserId(User);
+        if (userId != null)
+        {
+            notifications = DbContext.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(8)
+                .ToList();
+
+            unreadCount = notifications.Count(n => !n.IsRead);
+        }
+    }
+}
+
+<div class="dropdown">
+       <button class="btn notification-bell-btn position-relative @(unreadCount > 0 ? "has-unread" : "")" type="button"
+            data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+        <i class="bi @(unreadCount > 0 ? "bi-bell-fill" : "bi-bell")"></i>
+        @if (unreadCount > 0)
+        {
+            <span class="notification-badge">@(unreadCount > 9 ? "9+" : unreadCount.ToString())</span>
+        }
+       </button>
+
+    <div class="dropdown-menu dropdown-menu-end shadow-sm account-menu p-0" style="width: 340px;">
+
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 account-head">
+            <span class="fw-semibold small">Notifications</span>
+            @if (unreadCount > 0)
+            {
+                <form asp-controller="Notifications" asp-action="MarkAllRead" method="post" class="m-0">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <button type="submit" class="btn btn-link btn-sm p-0 small">Mark all read</button>
+                </form>
+            }
+        </div>
+
+        @if (!notifications.Any())
+        {
+            <p class="text-muted small text-center py-4 mb-0">No notifications yet.</p>
+        }
+        else
+        {
+            <div style="max-height: 320px; overflow-y: auto;">
+                @foreach (var n in notifications)
+                {
+                    <form asp-controller="Notifications" asp-action="MarkRead" method="post" class="m-0">
+                        <input type="hidden" name="id" value="@n.Id" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                        <button type="submit"
+                                class="dropdown-item d-block text-wrap border-bottom py-2 @(n.IsRead ? "" : "fw-semibold")">
+                            <div class="small">@n.Message</div>
+                            <div class="small text-muted">@n.CreatedAt.ToString("dd MMM, h:mm tt")</div>
+                        </button>
+                    </form>
+                }
+            </div>
+        }
+
+        <div class="text-center py-2 border-top">
+            <a asp-controller="Notifications" asp-action="Index" class="small fw-semibold text-decoration-none">
+                View all
+            </a>
+        </div>
+
+    </div>
+</div>

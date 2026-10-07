@@ -1,0 +1,90 @@
+@{
+    var title = ViewData["Title"] ?? "Authentication";
+}
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <!-- Prevent light-mode flash -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem("ft-theme");
+
+                var theme = saved ||
+                    (window.matchMedia("(prefers-color-scheme: dark)").matches
+                        ? "dark"
+                        : "light");
+
+                document.documentElement.setAttribute(
+                    "data-bs-theme",
+                    theme
+                );
+            }
+            catch (e) {
+                document.documentElement.setAttribute(
+                    "data-bs-theme",
+                    "light"
+                );
+            }
+        })();
+    </script>
+
+    <title>@title - FixTrack</title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/Fixtrack.styles.css"
+          asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
+
+</head>
+
+<body class="auth-body">
+
+    <!-- Theme toggle -->
+    <div class="auth-theme-toggle">
+        <partial name="_ThemeToggle" />
+    </div>
+
+
+    <!-- Authentication content -->
+    <main class="auth-shell">
+
+        <div class="auth-card">
+
+            @RenderBody()
+
+        </div>
+
+    </main>
+
+
+    <!-- Scripts -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/theme.js"
+            asp-append-version="true"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+
+</html>
