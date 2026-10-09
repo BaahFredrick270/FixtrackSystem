@@ -466,9 +466,17 @@ thead.ft-thead th {
         display: none;
     }
 
+/* Hide Edge/IE's built-in password reveal icon so only our toggle shows */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
 
 /* =========================================================
    FULL-BLEED HERO
+   The photo section sets the height; the dark scrim fills ALL of it
+   (flex: 1) so no raw photo shows at the bottom edge.
    ========================================================= */
 
 .hero-bleed {
@@ -479,6 +487,8 @@ thead.ft-thead th {
 
 .hero-photo-bg {
     min-height: 520px;
+    display: flex;
+    flex-direction: column;
     background-image: url("../images/repair.jpg");
     background-size: cover;
     background-position: center 55%;
@@ -487,7 +497,7 @@ thead.ft-thead th {
 }
 
 .hero-scrim {
-    min-height: 500px;
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     background: linear-gradient( to bottom, rgba(8, 15, 35, 0.35) 0%, rgba(8, 15, 35, 0.42) 40%, rgba(8, 15, 35, 0.62) 75%, rgba(8, 15, 35, 0.88) 100% ), linear-gradient( 100deg, rgba(8, 15, 35, 0.42) 0%, rgba(8, 15, 35, 0.22) 45%, rgba(8, 15, 35, 0) 80% );
@@ -509,8 +519,7 @@ thead.ft-thead th {
 }
 
 @media (max-width: 991.98px) {
-    .hero-photo-bg,
-    .hero-scrim {
+    .hero-photo-bg {
         min-height: 420px;
     }
 
@@ -872,6 +881,35 @@ a.text-decoration-none:hover .fw-bold {
     z-index: 10;
 }
 
+/* Back button pinned to the top-left corner of the auth screens
+   (login, forgot password, reset password). Mirrors the theme toggle. */
+.auth-back {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 38px;
+    padding: 0 0.95rem;
+    border: 1px solid var(--ft-border);
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--ft-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+    .auth-back:hover,
+    .auth-back:focus-visible {
+        color: var(--ft-accent);
+        background-color: var(--ft-accent-soft);
+        border-color: var(--ft-accent);
+    }
+
 
 /* =========================================================
    FOOTER
@@ -971,6 +1009,7 @@ a.text-decoration-none:hover .fw-bold {
         }
 }
 
+
 /* =========================================================
    NOTIFICATION BELL
    ========================================================= */
@@ -1025,7 +1064,7 @@ a.text-decoration-none:hover .fw-bold {
             background-color: rgba(245, 158, 11, 0.2);
         }
 
- @keyframes bell-ring {
+@keyframes bell-ring {
     0%, 100% {
         transform: rotate(0deg);
     }
@@ -1051,7 +1090,7 @@ a.text-decoration-none:hover .fw-bold {
     }
 }
 
- @media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
     .notification-bell-btn.has-unread {
         animation: none !important;
     }

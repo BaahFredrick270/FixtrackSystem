@@ -15,6 +15,10 @@ public static class DbSeeder
     public const string ReceptionistRole = "Receptionist";
     public const string TechnicianRole = "Technician";
 
+    // Starter account emails (must match what is in the database).
+    private const string ReceptionistEmail = "baahfredrick08@gmail.com";
+    private const string TechnicianEmail = "baahfredrick09@gmail.com";
+
     public static async Task SeedAsync(IServiceProvider services)
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -31,35 +35,33 @@ public static class DbSeeder
 
         // ----- starter accounts -----
         await EnsureUserAsync(userManager,
-            email: "reception@fixtrack.local",
+            email: ReceptionistEmail,
             fullName: "Front Desk",
             password: "Fix@123",
             role: ReceptionistRole);
 
         await EnsureUserAsync(userManager,
-            email: "tech@fixtrack.local",
+            email: TechnicianEmail,
             fullName: "Kofi Mensah",
             password: "Fix@123",
             role: TechnicianRole);
 
         // ----- technician profiles -----
         // Having the Technician role is not enough: the system also needs
-        // to know what this person repairs and where they are.
+        // to know what this person repairs.
         var context = services.GetRequiredService<ApplicationDbContext>();
 
         await EnsureTechnicianAsync(context, userManager,
-            email: "tech@fixtrack.local",
+            email: TechnicianEmail,
             specialization: Specialization.Laptop,
-            baseLocation: "Main Workshop",
-            latitude: 5.6037,
-            longitude: -0.1870);
+            baseLocation: "Main Workshop");
     }
 
     private static async Task EnsureTechnicianAsync(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
         string email, Specialization specialization,
-        string baseLocation, double latitude, double longitude)
+        string baseLocation)
     {
         var user = await userManager.FindByEmailAsync(email);
         if (user is null) return;
@@ -73,10 +75,7 @@ public static class DbSeeder
             UserId = user.Id,
             Specialization = specialization,
             Status = TechnicianStatus.Available,
-            BaseLocation = baseLocation,
-            Latitude = latitude,
-            Longitude = longitude,
-            LastLocationUpdate = DateTime.Now
+            BaseLocation = baseLocation
         });
 
         await context.SaveChangesAsync();
@@ -112,3 +111,4 @@ public static class DbSeeder
         }
     }
 }
+

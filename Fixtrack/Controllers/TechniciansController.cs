@@ -9,11 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fixtrack.Controllers;
 
-/// <summary>
-/// Receptionist-only. A technician is created here together with their
-/// login: the receptionist never chooses a password, the system generates
-/// one and shows it once.
-/// </summary>
+
 [Authorize(Roles = "Receptionist")]
 public class TechniciansController : Controller
 {

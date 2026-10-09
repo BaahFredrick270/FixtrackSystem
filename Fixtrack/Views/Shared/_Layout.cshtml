@@ -78,9 +78,6 @@
                                     <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                                 }
                             </li>
-                            <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                         </ul>
 
                         <div class="d-flex align-items-center gap-2">
@@ -161,11 +158,8 @@
              FOOTER (signed-out only)
              ========================= -->
         <footer class="footer border-top">
-            <div class="container">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-                    <span>&copy; 2026 FixTrack</span>
-                    <a asp-controller="Home" asp-action="Privacy">Privacy</a>
-                </div>
+            <div class="container text-center">
+                © @DateTime.Now.Year FixTrack · Staff access only. Need an account? Ask the front desk.
             </div>
         </footer>
     }

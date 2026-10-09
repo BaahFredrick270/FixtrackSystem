@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 namespace Fixtrack.ViewModels;
 
 public class ResetPasswordViewModel

@@ -33,6 +33,14 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
      .AddRoles<IdentityRole>()
      .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Send signed-out visitors to OUR login page, and signed-in users who lack the
+// right role to OUR "Access denied" page (instead of the built-in Identity ones).
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+
 // ---------- MVC ----------
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();      // the Identity login screens are Razor Pages

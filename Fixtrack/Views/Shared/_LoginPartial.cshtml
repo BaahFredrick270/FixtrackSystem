@@ -111,17 +111,8 @@
                 <!-- Logout -->
                 <li>
 
-                    <form asp-area="Identity"
-                          asp-page="/Account/Logout"
-                          asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-
-                        <button type="submit"
-                                class="dropdown-item">
-
-                            Log out
-
-                        </button>
-
+                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        <button type="submit" class="dropdown-item">Log out</button>
                     </form>
 
                 </li>
@@ -135,7 +126,7 @@
         <!-- Login -->
         <li class="nav-item">
 
-            <a class="nav-link nav-signin"
+            <a class="nav-link nav-login"
                asp-controller="Account"
                asp-action="Login">
 
