@@ -34,15 +34,17 @@
 
             <dt class="col-sm-3">Owner</dt>
             <dd class="col-sm-9">
-                @if (Model.Customer != null)
+                @if (Model.Customer == null)
                 {
-                    <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.Customer.Id">
-                        @Model.Customer.FullName
-                    </a>
+                    <span>—</span>
+                }
+                else if (User.IsInRole("Receptionist"))
+                {
+                    <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.CustomerId">@Model.Customer.FullName</a>
                 }
                 else
                 {
-                    <span>—</span>
+                    <span>@Model.Customer.FullName</span>
                 }
             </dd>
 

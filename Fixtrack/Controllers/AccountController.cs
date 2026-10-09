@@ -29,9 +29,9 @@ namespace Fixtrack.Controllers
         }
 
 
-        // =========================
+        
         // LOGIN
-        // =========================
+        
 
         [HttpGet]
         public IActionResult Login()
@@ -98,23 +98,20 @@ namespace Fixtrack.Controllers
         }
 
 
-        // =========================
+        
         // LOGOUT
-        // =========================
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-
             return RedirectToAction("Login", "Account");
         }
 
 
-        // =========================
         // FORGOT PASSWORD (email reset link)
-        // =========================
 
         [HttpGet]
         [AllowAnonymous]
@@ -176,9 +173,9 @@ namespace Fixtrack.Controllers
         }
 
 
-        // =========================
+        
         // RESET PASSWORD (from the emailed link)
-        // =========================
+        
 
         [HttpGet]
         [AllowAnonymous]

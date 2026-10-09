@@ -23,17 +23,17 @@ namespace Fixtrack.Controllers
         }
 
         // GET: Customers
+
         public async Task<IActionResult> Index()
         {
-            // Include loads each customer's devices so the list can show a
-            // device count. Without it, item.Devices would always be empty.
-            return View(await _context.Customers
+            var customers = await _context.Customers
                 .Include(c => c.Devices)
-                // Sort on real columns - FullName is [NotMapped], so EF
-                // cannot turn it into SQL and would throw at runtime.
-                .OrderBy(c => c.LastName)
-                .ThenBy(c => c.FirstName)
-                .ToListAsync());
+                .OrderByDescending(c => c.Id)
+                //.OrderBy(c => c.LastName)
+                //.ThenBy(c => c.FirstName)
+                .ToListAsync();
+
+            return View(customers);
         }
 
         // GET: Customers/Details/5

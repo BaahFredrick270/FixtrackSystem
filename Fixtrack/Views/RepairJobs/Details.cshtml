@@ -8,11 +8,6 @@
         ? moves
         : Array.Empty<RepairStatus>();
 
-    // Before the customer has a quote to react to, the estimated cost is
-    // just the technician's working number - the receptionist has nothing
-    // to relay yet. Once the job reaches AwaitingApproval (or moves past
-    // it), the receptionist needs the figure to pass on to the customer
-    // and record their decision.
     var showCostToReceptionist = Model.Status != RepairStatus.Received
         && Model.Status != RepairStatus.Assigned
         && Model.Status != RepairStatus.Diagnosing;

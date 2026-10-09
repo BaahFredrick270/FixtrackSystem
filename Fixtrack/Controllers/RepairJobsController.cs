@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fixtrack.Controllers;
 
-
+// Every action needs a signed-in user. Individual actions narrow it further by role.
+[Authorize]
 public class RepairJobsController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -55,10 +56,23 @@ public class RepairJobsController : Controller
         _notifications = notifications;
     }
 
+    
+    private bool IsTechnicianOnly
+        => User.IsInRole("Technician") && !User.IsInRole("Receptionist");
+
     // GET: RepairJobs
     public async Task<IActionResult> Index(RepairStatus? status)
     {
-        var query = _context.RepairJobs
+        // Technicians only ever see their own jobs - in the list AND in the counts.
+        var scoped = _context.RepairJobs.AsQueryable();
+
+        if (IsTechnicianOnly)
+        {
+            var userId = _userManager.GetUserId(User);
+            scoped = scoped.Where(j => j.Technician != null && j.Technician.UserId == userId);
+        }
+
+        var query = scoped
             .Include(j => j.Customer)
             .Include(j => j.Device)
             .Include(j => j.Technician).ThenInclude(t => t!.User)
@@ -73,7 +87,7 @@ public class RepairJobsController : Controller
             .OrderByDescending(j => j.CreatedAt)
             .ToListAsync();
 
-        ViewBag.StatusCounts = await _context.RepairJobs
+        ViewBag.StatusCounts = await scoped
             .GroupBy(j => j.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Status, x => x.Count);
@@ -420,13 +434,27 @@ public class RepairJobsController : Controller
         return Json(new { specialization = (int)SpecializationFor(device.DeviceType) });
     }
 
+    /// <summary>
+    /// Loads one job with everything the pages need. This is the single gate for
+    /// every action that works on a job: a technician-only user gets null (so the
+    /// action returns 404) for any job that is not assigned to them.
+    /// </summary>
     private async Task<RepairJob?> LoadJobAsync(int id)
-        => await _context.RepairJobs
+    {
+        IQueryable<RepairJob> query = _context.RepairJobs
             .Include(j => j.Customer)
             .Include(j => j.Device)
             .Include(j => j.Technician).ThenInclude(t => t!.User)
-            .Include(j => j.Notes).ThenInclude(n => n.Technician).ThenInclude(t => t!.User)
-            .FirstOrDefaultAsync(j => j.Id == id);
+            .Include(j => j.Notes).ThenInclude(n => n.Technician).ThenInclude(t => t!.User);
+
+        if (IsTechnicianOnly)
+        {
+            var userId = _userManager.GetUserId(User);
+            query = query.Where(j => j.Technician != null && j.Technician.UserId == userId);
+        }
+
+        return await query.FirstOrDefaultAsync(j => j.Id == id);
+    }
 
     private static bool CanMoveTo(RepairJob job, RepairStatus target)
         => AllowedMoves.TryGetValue(job.Status, out var moves) && moves.Contains(target);
